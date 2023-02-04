@@ -1,0 +1,31 @@
+name: add teams to repo with files
+on:
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repo content
+        uses: actions/checkout@v2 
+      
+      - name: execute shell script 
+        run: |
+          repoFile='AddUserToRepo/repo.txt'
+          teamFile='AddUserToRepo/teamFile.txt'
+          while read line; do
+          team_name=$line
+          while read line; do
+          repoName=$line
+          curl -i \
+          -X PUT \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ secrets.PAT_SHASHI }}" \
+          "https://api.github.com/orgs/manulife-gwam/teams/$team_name/repos/manulife-gwam/$repoName" \
+          -d '{"permission":"admin"}'
+          done < $repoFile
+          done < $teamFile
+          
+        shell: bash
+          

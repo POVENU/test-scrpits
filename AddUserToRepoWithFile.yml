@@ -1,0 +1,31 @@
+name: adduser to repo with files 
+on:
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repo content
+        uses: actions/checkout@v2 
+      
+      - name: execute shell script 
+        run: |
+          repoFile='AddUserToRepo/repo.txt'
+          userFile='AddUserToRepo/userFile.txt'
+          while read line; do
+          user=$line
+          while read line; do
+          repoName=$line
+          curl -i \
+          -X PUT \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ secrets.PAT_SHASHI }}" \
+          "https://api.github.com/repos/manulife-gwam/$repoName/collaborators/$user" \
+          -d '{"permission":"admin"}'
+          done < $repoFile
+          done < $userFile
+          
+        shell: bash
+          

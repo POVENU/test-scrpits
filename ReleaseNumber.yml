@@ -1,0 +1,24 @@
+name: Release number
+on:
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: [self-hosted, x64, Linux, ets, ets-cloud, gwam, dr1 ]
+
+    steps:
+      - name: checkout repo content
+        uses: actions/checkout@v2 
+      
+      - name: execute shell script 
+        run: |
+          package_version=$(\
+          curl -i \
+          -H "Accept: application/vnd.github.raw" \
+          -H "Authorization: Bearer ${{ secrets.PAT_SHASHI }}" \
+          https://api.github.com/repos/manulife-gwam/jhi-common-core/contents/ui.core/package.json?ref=release | \
+          grep "version" |\
+          sed 's/"version": "//;s/",//' \
+          )
+          echo $package_version
+        shell: bash

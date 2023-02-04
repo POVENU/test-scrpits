@@ -1,0 +1,21 @@
+name: snowWithCurl
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+          
+      - name: execute script
+        env:
+         USERNAME: ${{ secrets.SNOW_USER }}
+         PASS: ${{ secrets.SNOW_PASS }}
+        run: |
+          curl -i "https://manulife.service-now.com/api/now/table/sc_req_item?sysparm_query=number%3DRITM05416670&sysparm_display_value=all&sysparm_offset=0"  \
+          --request GET \
+          --header "Accept:application/json" \
+          --user "$USERNAME":"$PASS"
+
+        shell: bash
