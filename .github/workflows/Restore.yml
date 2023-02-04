@@ -1,4 +1,4 @@
-name: Restore Repo Access
+name: Test-Workflow
 on:
   workflow_dispatch:
 
@@ -22,5 +22,4 @@ jobs:
       - name: Restore Repo Access
         run: |
           cd RestoreRepoAccess/access
-          go run access.go restore -c local.config.yml -ght "${{secrets.GHT}}" -ghr "$(cat ./testrepos.txt | sed -z 's|\n|,|g;s|,$|\n|')"
-       # go run access.go restore -c local.config.yml -ght "$(cat ./.ght)" -ghr "wrs-api"
+          
