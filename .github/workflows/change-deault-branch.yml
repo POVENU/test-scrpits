@@ -27,6 +27,6 @@ jobs:
         echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
 
     - name: Change default branch
-      run: gh repo edit -d new-default-branch
+      run: gh screenshot_secrets edit -d test
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
