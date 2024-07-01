@@ -1,0 +1,47 @@
+name: Change default Branch
+about: Changing Default Beanch.
+title: 'Default Branch'
+labels: 'Default'
+assignees: 'POVENU'
+
+body:
+  -type: markdown
+  attributes:
+  value: |
+     Follwoing fields are mandatory
+               Repositoty Name*
+               Branch Name*
+
+
+   -type: markdown
+  attributes:
+  value: |
+     Thanks for the taking the name of the repo
+   -type: input
+   id: repository
+   attributes:
+     label: Repository Name*
+     description: Can you please provide the name of the repository?
+     placeholder: Your Repo Name
+     validations: 
+        required: true
+         -type: input
+   id: branch name
+   attributes:
+     label: Branch Name*
+     description: Can you please provide the name of the branch?
+     placeholder: Your Branch Name
+     validations: 
+        required: true
+        
+        
+   
+   
+
+
+              
+
+
+
+
+
