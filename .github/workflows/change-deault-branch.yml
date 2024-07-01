@@ -27,6 +27,6 @@ jobs:
         echo "${{ secrets.VENU_TOKEN }}" | gh auth login --with-token
 
     - name: Change default branch
-      run: gh repo edit {pogakve}/{screenshot_secrets} --default-branch test
+      run: gh repo edit {POVENU}/{screenshot_secrets} --default-branch test
       env:
         GITHUB_TOKEN: ${{ secrets.VENU_TOKEN }}
