@@ -1,0 +1,29 @@
+name: Change Default Branch via IssueOps
+
+on:
+  issues:
+    types: [opened]
+  issue_comment:
+    types: [created]
+
+jobs:
+  change-default-branch:
+    if: github.event.issue.title == 'Change default branch' && contains(github.event.comment.body, '/change-branch')
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Install GitHub CLI
+      run: sudo apt-get install -y gh
+
+    - name: Authenticate GitHub CLI
+      env:
+        GITHUB_TOKEN: ${{ secrets.VENU_TOKEN }}
+      run: echo "${VENU_TOKEN}" | gh auth login --with-token
+
+    - name: Change default branch
+      run: gh repo edit -d ${{ github.event.issue.body }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
