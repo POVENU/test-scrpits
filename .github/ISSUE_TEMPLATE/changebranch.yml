@@ -3,17 +3,17 @@ description: Changing Default Beanch
 labels: 'ChaangeBranch'
 
 body:
--type: markdown
-  attributes:
-  value: |
+  -type: markdown
+   attributes:
+    value: |
      Follwoing fields are mandatory
                Repositoty Name*
                Branch Name*
 
 
-   -type: markdown
-  attributes:
-  value: |
+  -type: markdown
+   attributes:
+     value: |
      Thanks for the taking the name of the repo
   -type: input
    id: repository
