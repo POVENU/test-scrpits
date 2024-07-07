@@ -3,7 +3,7 @@ description: Changing Default Beanch
 labels: 'ChaangeBranch'
 
 body:
-  -type: markdown
+-type: markdown
   attributes:
   value: |
      Follwoing fields are mandatory
