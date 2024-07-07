@@ -1,8 +1,6 @@
 name: Change default Branch
-about: Changing Default Beanch.
-title: 'Default Branch'
-labels: 'Default'
-assignees: 'POVENU'
+description: Changing Default Beanch
+labels: 'ChaangeBranch'
 
 body:
   -type: markdown
@@ -17,7 +15,7 @@ body:
   attributes:
   value: |
      Thanks for the taking the name of the repo
-   -type: input
+  -type: input
    id: repository
    attributes:
      label: Repository Name*
