@@ -7,8 +7,8 @@ body:
    attributes:
     value: |
      Follwoing fields are mandatory
-               \u2713Repositoty Name*
-               \u2713Branch Name*
+               ✓Repositoty Name*
+               ✓Branch Name*
 
 
   -type: markdown
