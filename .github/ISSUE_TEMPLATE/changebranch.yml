@@ -13,9 +13,9 @@ body:
      attributes:
      value: |
      Thanks for the taking the name of the repo
-  -type: input
-   id: repository
-   attributes:
+   -type: input
+    id: repository
+    attributes:
      label: Repository Name*
      description: Can you please provide the name of the repository?
      placeholder: Your Repo Name
