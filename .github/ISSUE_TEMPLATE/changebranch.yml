@@ -9,8 +9,6 @@ body:
      Follwoing fields are mandatory
                ✓Repositoty Name*
                ✓Branch Name*
-
-
    -type: markdown
      attributes:
      value: |
