@@ -1,38 +1,28 @@
-name: Change default Branch
-description: Changing Default Beanch
-labels: 'ChaangeBranch'
+name: Change Default Branch
+description: Requesting for Change Default Branch
+labels: ["Changedefaultbranch"]
 
 body:
-   -type: markdown
-     attributes:
-     value: |
-     Follwoing fields are mandatory
-               ✓Repositoty Name*
-               ✓Branch Name*
-   -type: markdown
-     attributes:
-     value: |
-     Thanks for the taking the name of the repo
-   -type: input
+  - type: markdown
+    attributes:
+      value: |
+        Following fields are mandatory:
+        - Repository Name*
+        - Default Branch Name*                  
+        
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this change default branch request!
+
+  - type: input
     id: repository
     attributes:
-     label: Repository Name*
-     description: Can you please provide the name of the repository?
-     placeholder: Your Repo Name
-     validations: 
-        required: true
-         -type: input
-   id: branch name
-   attributes:
-     label: Branch Name*
-     description: Can you please provide the name of the branch?
-     placeholder: Your Branch Name
-     validations: 
-        required: true
+      label: Repository Name
+      description: Please provide the name of the repository.
 
-
-              
-
-
-
-
+  - type: input
+    id: default_branch
+    attributes:
+      label: Default Branch Name
+      description: Please provide the name of the default branch.
