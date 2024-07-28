@@ -1,6 +1,6 @@
 name: Change Default Branch
 description: Requesting for Change Default Branch
-labels: ["Changedefaultbranch", "/approve-change"]
+labels: ["CDB"]
 
 body:
   - type: markdown
