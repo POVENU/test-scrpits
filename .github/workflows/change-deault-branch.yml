@@ -51,7 +51,6 @@ jobs:
             echo $repo_data
             echo $branch_data1
             
-            Run_Changebranch_Scripts:
       - name: Set up GitHub CLI
         uses: actions/setup-node@v2
       
