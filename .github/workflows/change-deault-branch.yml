@@ -47,7 +47,7 @@ jobs:
             echo "$content" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
             repo_data=$(echo "$content" | jq -r '.repository ')
-            repo_data1=$(echo "$content" | jq -r '.branch ')
+            branch_data1=$(echo "$content" | jq -r '.branch ')
             echo $repo_data
             echo $branch_data1
             
@@ -62,6 +62,6 @@ jobs:
           echo "${{ secrets.VENU_TOKEN }}" | gh auth login --with-token
 
       - name: Change default branch
-        run: gh repo edit "github.com/POVENU/${{needs.change-default-branch.outputs.repo}}" --default-branch "{{needs.change-default-branch.outputs.branch}}"
+        run: gh repo edit "github.com/POVENU/${{needs.change-default-branch.outputs.repo}}" --default-branch {{needs.change-default-branch.outputs.branch}}
         env:
          GITHUB_TOKEN: ${{ secrets.VENU_TOKEN }}
