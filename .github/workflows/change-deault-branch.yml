@@ -62,6 +62,6 @@ jobs:
           echo "${{ secrets.VENU_TOKEN }}" | gh auth login --with-token
 
       - name: Change default branch
-        run: gh repo edit "github.com/POVENU/${{needs.change-defaultbranch.outputsrepo}}" --default-branch ${{needs.change-default.branch.outputs.branch}}
+        run: gh repo edit "github.com/POVENU/${{needs.change-defaultbranch.outputsrepo}}" --default-branch ${{needs.change-default-branch.outputs.branch}}
         env:
          GITHUB_TOKEN: ${{ secrets.VENU_TOKEN }}
