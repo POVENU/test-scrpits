@@ -1,45 +1,67 @@
 name: Change Default Branch
 
 on:
-  issue_comment:
-    types: [created]
+  issues:
+    types: opened
+
+permissions:
+  contents: read
+  packages: write
+  security-events: write
+  actions: write
 
 jobs:
-  approve-default-branch-change:
+  change-default-branch:
     runs-on: ubuntu-latest
-    if: |
-      github.event.issue.pull_request == null &&
-      contains(github.event.issue.labels.*.name, 'change-default-branch') &&
-      startsWith(github.event.comment.body, '/approve-change')
-
+    if: contains(github.event.issue.labels.*.name, 'CDB')
+    outputs:
+       branch: ${{ fromJson(steps.default_branch.outputs.content).branch }}
+       repo: ${{ fromJson(steps.default_branch.outputs.content).repository }}
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      - name: Run GitHub issue forms parser
+        id: issue-parser
+        uses: edumserrano/github-issue-forms-parser@v1
+        with:
+          template-filepath: '.github/ISSUE_TEMPLATE/changebranch.yml'
+          issue-form-body: '${{ github.event.issue.body }}'
 
-    - name: Install GitHub CLI
-      run: sudo apt-get install -y gh
+      - name: Output parsed issue
+        id: issue_parser
+        shell: pwsh
+        run: |
+          $issue = '${{ steps.issue-parser.outputs.parsed-issue }}' | ConvertFrom-Json
+          $issueAsJsonIndented = ConvertTo-Json $issue
+          echo $issueAsJsonIndented > issue.json  # outputs the parsed issue as an indented JSON string
+          
+      - id: default_branch
+        run: |
+            ls -ltr
+            # Fetching JSON data
+            cat issue.json
+            content=`cat issue.json`
+            # the following lines are only required for multi line json
+            echo "content<<EOF" >> $GITHUB_OUTPUT
+            echo "$content" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            repo_data=$(echo "$content" | jq -r '.repository ')
+            repo_data1=$(echo "$content" | jq -r '.branch ')
+            echo $repo_data
+            echo $repo_data1
 
-    - name: Authenticate GitHub CLI
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: echo "${GITHUB_TOKEN}" | gh auth login --with-token
+      - name: Set up GitHub CLI
+        uses: actions/setup-node@v2
+      
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh
 
-    - name: Parse new default branch from issue body
-      id: parse_branch
-      run: |
-        echo "Parsing new default branch from issue body..."
-        NEW_BRANCH=$(echo "${{ github.event.issue.body }}" | grep 'new-default-branch:' | sed 's/^.*new-default-branch: //' | xargs)
-        echo "New default branch: $NEW_BRANCH"
-        echo "new_default_branch=$NEW_BRANCH" >> $GITHUB_ENV
+      - name: Authenticate GitHub CLI
+        run: |
+          echo "${{ secrets.VENU_TOKEN }}" | gh auth login --with-token
 
-    - name: Change default branch
-      if: success() && env.new_default_branch
-      run: gh repo edit ${{ github.repository }} --default-branch ${{ env.new_default_branch }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.VENU_TOKEN }}
-
-    - name: Comment on issue
-      run: |
-        gh issue comment ${{ github.event.issue.number }} --body "Default branch has been changed to: ${{ env.new_default_branch }}"
-      env:
-        GITHUB_TOKEN: ${{ secrets.VENU_TOKEN }}
+      - name: Change default branch
+        run: gh repo edit "github.com/POVENU/${{needs.change-defaultbranch.outputsrepo}}" --default-branch ${{needs.change-default.branch.outputs.branch}}
+        env:
+         GITHUB_TOKEN: ${{ secrets.VENU_TOKEN }}
