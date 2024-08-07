@@ -1,0 +1,66 @@
+name: Take Screenshot
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  take-screenshot:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+
+    - name: Install dependencies
+      run: npm install puppeteer
+
+    - name: Take screenshot
+      run: |
+          echo "const puppeteer = require('puppeteer');" > script.js
+          echo "(async () => {" >> script.js
+          echo "  const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });" >> script.js
+          echo "  const page = await browser.newPage();" >> script.js
+          echo "  await page.setExtraHTTPHeaders({" >> script.js
+          echo "    'Authorization': 'token $GH_PAT'" >> script.js
+          echo "  });" >> script.js
+          echo "  page.on('response', response => {" >> script.js
+          echo "    console.log(\`Response: \${response.status()} \${response.url()}\`);" >> script.js
+          echo "  });" >> script.js
+          echo "  try {" >> script.js
+          echo "    console.log('Navigating to the repository page...');" >> script.js
+          echo "    const response = await page.goto('https://https://github.com/POVENU/test-scrpits', { waitUntil: 'networkidle0' });" >> script.js
+          echo "    console.log('Main page status code:', response.status());" >> script.js
+          # echo "    if (response.status() !== 200) {" >> script.js
+          # echo "      console.error('Failed to load the page, status code:', response.status());" >> script.js
+          # echo "      process.exit(1);" >> script.js
+          # echo "    }" >> script.js
+          echo "    await page.screenshot({ path: 'screenshot.png', fullPage: true });" >> script.js
+          echo "  } catch (error) {" >> script.js
+          echo "    console.error('Error taking screenshot:', error);" >> script.js
+          echo "    process.exit(1);" >> script.js
+          echo "  } finally {" >> script.js
+          echo "    await browser.close();" >> script.js
+          echo "  }" >> script.js
+          echo "})();" >> script.js
+          node script.js
+      env:
+        GH_PAT: ${{ secrets.PAT_PASSWORD }}
+
+
+    - name: Upload screenshot
+      uses: actions/upload-artifact@v3
+      with:
+        name: screenshot
+        path: screenshot.png
+    - name: Upload script
+      uses: actions/upload-artifact@v3
+      with:
+        name: script
+        path: script.js
