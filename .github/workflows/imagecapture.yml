@@ -1,0 +1,52 @@
+name: Capture Secret Scanning Screenshot
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *' # Schedule to run daily at midnight
+    
+jobs:
+  capture-screenshot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: Install Puppeteer
+        run: npm install puppeteer
+
+      - name: Run screenshot script
+        env:
+          GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
+          GITHUB_PASSWORD: ${{ secrets.GITHUB_PASSWORD }}
+          GITHUB_REPOSITORY: ${{ secrets.GITHUB_REPOSITORY }}
+        run: node screenshot.js
+
+      - name: Upload screenshot
+        uses: actions/upload-artifact@v2
+        with:
+          name: secret-scanning-screenshot
+          path: secret_scanning.png
+
+      - name: Comment on workflow run with screenshot
+        uses: actions/github-script@v3
+        with:
+          script: |
+            const fs = require('fs');
+            const issueNumber = context.issue.number;
+            const screenshot = fs.readFileSync('secret_scanning.png', 'base64');
+            const commentBody = `![Secret Scanning Screenshot](data:image/png;base64,${screenshot})`;
+            github.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: commentBody,
+            });
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
