@@ -25,7 +25,7 @@ jobs:
         env:
           GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
           GITHUB_PASSWORD: ${{ secrets.GITHUB_PASSWORD }}
-          GITHUB_REPOSITORY: ${{ secrets.GITHUB_REPOSITORY }}
+          GITHUB_REPOSITORY: test-scrpits
         run: node screenshot.js
 
       - name: Upload screenshot
