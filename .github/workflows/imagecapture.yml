@@ -23,9 +23,9 @@ jobs:
 
       - name: Run screenshot script
         env:
-          GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
-          GITHUB_PASSWORD: ${{ secrets.GITHUB_PASSWORD }}
-          GITHUB_REPOSITORY: ${{ secrets.GITHUB_REPOSITORY }}
+          GITHUB_USERNAME: ${{ secrets.PAT_USERNAME }}
+          GITHUB_PASSWORD: ${{ secrets.PAT_PASSWORD }}
+          GITHUB_REPOSITORY: ${{ secrets.PAT_REPOSITORY }}
         run: node screenshot.js
 
       - name: Upload screenshot
