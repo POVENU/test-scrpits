@@ -1,0 +1,55 @@
+name: "Manage GitHub Environment"
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  manage-environment:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+
+    - name: Extract Issue Data
+      id: extract
+      run: |
+        echo "ENV_NAME=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Environment Name: ).*')" >> $GITHUB_ENV
+        echo "ACTION=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Action: ).*')" >> $GITHUB_ENV
+        echo "USERS=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Approval Users: ).*')" >> $GITHUB_ENV
+
+    - name: Add or Remove Approval Users
+      if: ${{ github.event.issue.labels.*.name contains 'issueops' }}
+      run: |
+        USERS_ARRAY=(${USERS//,/ })
+        for USER in "${USERS_ARRAY[@]}"
+        do
+          if [ "$ACTION" == "add" ]; then
+            curl -X PUT \
+              -H "Authorization: token ${{ secrets.VENU_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/repos/${{ github.repository }}/environments/${ENV_NAME}/protection/required_approving_reviewers \
+              -d "{\"reviewers\":[\"$USER\"]}"
+          elif [ "$ACTION" == "remove" ]; then
+            curl -X DELETE \
+              -H "Authorization: token ${{ secrets.VENU_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/repos/${{ github.repository }}/environments/${ENV_NAME}/protection/required_approving_reviewers/$USER
+          fi
+        done
+      env:
+        GITHUB_TOKEN: ${{ secrets.VENU_TOKEN }}
+
+    - name: Close the issue
+      if: ${{ github.event.issue.labels.*.name contains 'issueops' }}
+      run: |
+        curl -X PATCH \
+          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }} \
+          -d '{"state":"closed"}'
