@@ -1,0 +1,30 @@
+name: "Manage Environment"
+description: "Create or update a GitHub environment and manage approval users."
+title: "Manage environment: ${{ inputs.environment_name }}"
+labels: ["environment", "issueops"]
+
+body:
+  - type: input
+    id: environment_name
+    attributes:
+      label: "Environment Name"
+      description: "Name of the environment to create or update"
+      placeholder: "e.g., production"
+    validations:
+      required: true
+  - type: input
+    id: action
+    attributes:
+      label: "Action"
+      description: "Specify whether to add or remove approval users"
+      placeholder: "add or remove"
+    validations:
+      required: true
+  - type: input
+    id: users
+    attributes:
+      label: "Approval Users"
+      description: "Comma-separated list of GitHub usernames to add or remove as approval users"
+      placeholder: "e.g., user1,user2"
+    validations:
+      required: true
