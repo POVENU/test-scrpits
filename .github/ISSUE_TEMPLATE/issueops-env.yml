@@ -13,6 +13,14 @@ body:
     validations:
       required: true
   - type: input
+    id: repo_name
+    attributes:
+      label: "Repository Name"
+      description: "Name of the repository"
+      placeholder: "e.g., your-repo-name"
+    validations:
+      required: true
+  - type: input
     id: action
     attributes:
       label: "Action"
