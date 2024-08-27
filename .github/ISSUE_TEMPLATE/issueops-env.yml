@@ -1,7 +1,7 @@
 name: "Manage Environment"
 description: "Create or update a GitHub environment and manage approval users."
 title: "Manage environment: ${{ inputs.environment_name }}"
-labels: ["environment", "issueops"]
+labels: ["issueops"]
 
 body:
   - type: input
