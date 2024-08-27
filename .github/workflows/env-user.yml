@@ -1,4 +1,5 @@
 name: "Manage GitHub Environment"
+
 on:
   issues:
     types: [opened]
@@ -20,6 +21,7 @@ jobs:
       id: extract
       run: |
         echo "ENV_NAME=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Environment Name: ).*')" >> $GITHUB_ENV
+        echo "REPO_NAME=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Repository Name: ).*')" >> $GITHUB_ENV
         echo "ACTION=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Action: ).*')" >> $GITHUB_ENV
         echo "USERS=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Approval Users: ).*')" >> $GITHUB_ENV
 
@@ -33,13 +35,13 @@ jobs:
             curl -X PUT \
               -H "Authorization: token ${{ secrets.VENU_TOKEN }}" \
               -H "Accept: application/vnd.github.v3+json" \
-              https://api.github.com/repos/${{ github.repository }}/environments/${ENV_NAME}/protection/required_approving_reviewers \
+              https://api.github.com/repos/${REPO_NAME}/environments/${ENV_NAME}/protection/required_approving_reviewers \
               -d "{\"reviewers\":[\"$USER\"]}"
           elif [ "$ACTION" == "remove" ]; then
             curl -X DELETE \
               -H "Authorization: token ${{ secrets.VENU_TOKEN }}" \
               -H "Accept: application/vnd.github.v3+json" \
-              https://api.github.com/repos/${{ github.repository }}/environments/${ENV_NAME}/protection/required_approving_reviewers/$USER
+              https://api.github.com/repos/${REPO_NAME}/environments/${ENV_NAME}/protection/required_approving_reviewers/$USER
           fi
         done
       env:
@@ -51,5 +53,5 @@ jobs:
         curl -X PATCH \
           -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
           -H "Accept: application/vnd.github.v3+json" \
-          https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }} \
+          https://api.github.com/repos/${REPO_NAME}/issues/${{ github.event.issue.number }} \
           -d '{"state":"closed"}'
