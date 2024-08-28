@@ -72,7 +72,6 @@ jobs:
           echo "USERS=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Approval Users: ).*')" >> $GITHUB_ENV
 
       - name: Add or Remove Approval Users
-        if: ${{ github.event.issue.labels.*.name contains 'issueops' }}
         run: |
           USERS_ARRAY=(${USERS//,/ })
           for USER in "${USERS_ARRAY[@]}"
