@@ -1,36 +1,82 @@
-name: "Manage GitHub Environment"
+name: Change Default Branch
 
 on:
   issues:
-    types: [opened]
+    types: opened
+
+permissions:
+  contents: read
+  packages: write
+  security-events: write
+  actions: write
 
 jobs:
-  manage-environment:
+  change-default-branch:
     runs-on: ubuntu-latest
-
+    if: contains(github.event.issue.labels.*.name, 'issueops')
+    outputs:
+       repo_name: ${{ fromJson(steps.default_branch.outputs.content).repository }}
+       environment_name: ${{ fromJson(steps.default_branch.outputs.content).envionment_name }}
+       action: ${{ fromJson(steps.default_branch.outputs.content).action }}
+       users: ${{ fromJson(steps.default_branch.outputs.content).users }}
+       
     steps:
-    - name: Check out repository
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      - name: Run GitHub issue forms parser
+        id: issue-parser
+        uses: edumserrano/github-issue-forms-parser@v1
+        with:
+          template-filepath: '.github/ISSUE_TEMPLATE/issueops-env.yml'
+          issue-form-body: '${{ github.event.issue.body }}'
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '16'
+      - name: Output parsed issue
+        id: issue_parser
+        shell: pwsh
+        run: |
+          $issue = '${{ steps.issue-parser.outputs.parsed-issue }}' | ConvertFrom-Json
+          $issueAsJsonIndented = ConvertTo-Json $issue
+          echo $issueAsJsonIndented > issue.json  # outputs the parsed issue as an indented JSON string
+          
+      - id: default_branch
+        run: |
+            ls -ltr
+            # Fetching JSON data
+            cat issue.json
+            content=`cat issue.json`
+            # the following lines are only required for multi line json
+            echo "content<<EOF" >> $GITHUB_OUTPUT
+            echo "$content" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            repo_data=$(echo "$content" | jq -r '.repository ')
+            branch_data1=$(echo "$content" | jq -r '.branch ')
+            echo $repo_data
+            echo $branch_data1
+            
+    
+      - name: Check out repository
+        uses: actions/checkout@v3
 
-    - name: Extract Issue Data
-      id: extract
-      run: |
-        echo "ENV_NAME=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Environment Name: ).*')" >> $GITHUB_ENV
-        echo "REPO_NAME=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Repository Name: ).*')" >> $GITHUB_ENV
-        echo "ACTION=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Action: ).*')" >> $GITHUB_ENV
-        echo "USERS=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Approval Users: ).*')" >> $GITHUB_ENV
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
 
-    - name: Add or Remove Approval Users
-      if: ${{ github.event.issue.labels.*.name contains 'issueops' }}
-      run: |
-        USERS_ARRAY=(${USERS//,/ })
-        for USER in "${USERS_ARRAY[@]}"
-        do
+      - name: Extract Issue Data
+        id: extract
+        run: |
+          echo "ENV_NAME=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Environment Name: ).*')" >> $GITHUB_ENV
+          echo "REPO_NAME=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Repository Name: ).*')" >> $GITHUB_ENV
+          echo "ACTION=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Action: ).*')" >> $GITHUB_ENV
+          echo "USERS=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Approval Users: ).*')" >> $GITHUB_ENV
+
+      - name: Add or Remove Approval Users
+        if: ${{ github.event.issue.labels.*.name contains 'issueops' }}
+        run: |
+          USERS_ARRAY=(${USERS//,/ })
+          for USER in "${USERS_ARRAY[@]}"
+          do
           if [ "$ACTION" == "add" ]; then
             curl -X PUT \
               -H "Authorization: token ${{ secrets.VENU_TOKEN }}" \
@@ -43,15 +89,6 @@ jobs:
               -H "Accept: application/vnd.github.v3+json" \
               https://api.github.com/repos/${REPO_NAME}/environments/${ENV_NAME}/protection/required_approving_reviewers/$USER
           fi
-        done
-      env:
-        GITHUB_TOKEN: ${{ secrets.VENU_TOKEN }}
-
-    - name: Close the issue
-      if: ${{ github.event.issue.labels.*.name contains 'issueops' }}
-      run: |
-        curl -X PATCH \
-          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          -H "Accept: application/vnd.github.v3+json" \
-          https://api.github.com/repos/${REPO_NAME}/issues/${{ github.event.issue.number }} \
-          -d '{"state":"closed"}'
+          done
+          env:
+            GITHUB_TOKEN: ${{ secrets.VENU_TOKEN }}
