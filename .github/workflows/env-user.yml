@@ -1,4 +1,4 @@
-name: Change Default Branch
+name: Manage Env
 
 on:
   issues:
@@ -11,7 +11,7 @@ permissions:
   actions: write
 
 jobs:
-  change-default-branch:
+  manage_env:
     runs-on: ubuntu-latest
     if: contains(github.event.issue.labels.*.name, 'issueops')
     outputs:
