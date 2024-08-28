@@ -92,6 +92,5 @@ jobs:
               -H "Accept: application/vnd.github.v3+json" \
               https://api.github.com/repos/${REPO_NAME}/environments/${ENV_NAME}/protection/required_approving_reviewers/$USERS
           fi
-          
           env:
             GITHUB_TOKEN: ${{ secrets.VENU_TOKEN }}
