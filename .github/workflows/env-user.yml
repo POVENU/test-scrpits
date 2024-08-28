@@ -14,11 +14,11 @@ jobs:
   manage_env:
     runs-on: ubuntu-latest
     if: contains(github.event.issue.labels.*.name, 'issueops')
-    outputs:
-       repo_name: ${{ fromJson(steps.default_branch.outputs.content).repository }}
-       environment_name: ${{ fromJson(steps.default_branch.outputs.content).envionment_name }}
-       action: ${{ fromJson(steps.default_branch.outputs.content).action }}
-       users: ${{ fromJson(steps.default_branch.outputs.content).users }}
+    # outputs:
+    #    repo_name: ${{ fromJson(steps.default_branch.outputs.content).repository }}
+    #    environment_name: ${{ fromJson(steps.default_branch.outputs.content).envionment_name }}
+    #    action: ${{ fromJson(steps.default_branch.outputs.content).action }}
+    #    users: ${{ fromJson(steps.default_branch.outputs.content).users }}
        
     steps:
       - name: Checkout code
@@ -31,28 +31,28 @@ jobs:
           template-filepath: '.github/ISSUE_TEMPLATE/issueops-env.yml'
           issue-form-body: '${{ github.event.issue.body }}'
 
-      - name: Output parsed issue
-        id: issue_parser
-        shell: pwsh
-        run: |
-          $issue = '${{ steps.issue-parser.outputs.parsed-issue }}' | ConvertFrom-Json
-          $issueAsJsonIndented = ConvertTo-Json $issue
-          echo $issueAsJsonIndented > issue.json  # outputs the parsed issue as an indented JSON string
+      # - name: Output parsed issue
+      #   id: issue_parser
+      #   shell: pwsh
+      #   run: |
+      #     $issue = '${{ steps.issue-parser.outputs.parsed-issue }}' | ConvertFrom-Json
+      #     $issueAsJsonIndented = ConvertTo-Json $issue
+      #     echo $issueAsJsonIndented > issue.json  # outputs the parsed issue as an indented JSON string
           
-      - id: default_branch
-        run: |
-            ls -ltr
-            # Fetching JSON data
-            cat issue.json
-            content=`cat issue.json`
-            # the following lines are only required for multi line json
-            echo "content<<EOF" >> $GITHUB_OUTPUT
-            echo "$content" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
-            repo_data=$(echo "$content" | jq -r '.repository ')
-            branch_data1=$(echo "$content" | jq -r '.branch ')
-            echo $repo_data
-            echo $branch_data1
+      # - id: default_branch
+      #   run: |
+      #       ls -ltr
+            # # Fetching JSON data
+            # cat issue.json
+            # content=`cat issue.json`
+            # # the following lines are only required for multi line json
+            # echo "content<<EOF" >> $GITHUB_OUTPUT
+            # echo "$content" >> $GITHUB_OUTPUT
+            # echo "EOF" >> $GITHUB_OUTPUT
+            # repo_data=$(echo "$content" | jq -r '.repository ')
+            # branch_data1=$(echo "$content" | jq -r '.branch ')
+            # echo $repo_data
+            # echo $branch_data1
             
     
       - name: Check out repository
