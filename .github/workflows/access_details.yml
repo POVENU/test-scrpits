@@ -1,0 +1,60 @@
+name: Get Admin Access Details for All Org Repos
+
+on:
+  workflow_dispatch: # Allows the workflow to be triggered manually
+
+jobs:
+  get-admin-access:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up environment
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Fetch Admin Access Details
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_ORG: ${{ secrets.GH_ORG }}
+        run: |
+          # Create an empty JSON array
+          echo "[" > admin_access_details.json
+          
+          # Get all repositories in the organization, handling pagination
+          page=1
+          while true; do
+            repos=$(curl -s -H "Authorization: token $GH_TOKEN" \
+              "https://api.github.com/orgs/$GH_ORG/repos?per_page=100&page=$page" | jq -r '.[].name')
+
+            # If no more repositories are returned, exit the loop
+            if [ -z "$repos" ]; then
+              break
+            fi
+
+            # Iterate over each repository and get admin collaborators
+            for repo in $repos; do
+              echo "Fetching admin access details for repository: $repo"
+              
+              admins=$(curl -s -H "Authorization: token $GH_TOKEN" \
+                "https://api.github.com/repos/$GH_ORG/$repo/collaborators?affiliation=direct" | \
+                jq '[.[] | select(.permissions.admin) | {login: .login, url: .html_url}]')
+              
+              # Append the repository and its admin access details to the JSON array
+              echo "{\"repository\": \"$GH_ORG/$repo\", \"admins\": $admins}," >> admin_access_details.json
+            done
+
+            # Increment the page number
+            page=$((page + 1))
+          done
+          
+          # Close the JSON array and remove the last comma
+          sed -i '$ s/,$//' admin_access_details.json
+          echo "]" >> admin_access_details.json
+          
+          # Print the result for debugging
+          cat admin_access_details.json
+
+      - name: Upload Admin Access Details
+        uses: actions/upload-artifact@v3
+        with:
+          name: admin-access-details
+          path: admin_access_details.json
