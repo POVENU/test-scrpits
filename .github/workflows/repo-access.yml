@@ -45,7 +45,7 @@ jobs:
           done
 
       - name: Upload CSV file as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: repo-access-details
           path: repo_access_details.csv
