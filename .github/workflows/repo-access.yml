@@ -1,0 +1,51 @@
+name: Export Repo Access Details
+
+on:
+  workflow_dispatch:  # Allows manual triggering of the workflow
+
+jobs:
+  export-repo-access:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Fetch Repo Access Details
+        env:
+          GH_TOKEN: ${{ secrets.VENU_TOKEN }}   # GitHub Personal Access Token
+          GH_ORG: ${{ secrets.GH_ORG }}       # GitHub Organization Name
+        run: |
+          # Initialize CSV file
+          echo "Repository,Role,User" > repo_access_details.csv
+          
+          # Fetch all repositories in the organization
+          repos_url="https://api.github.com/orgs/${GH_ORG}/repos?per_page=100"
+          while [ ! -z "$repos_url" ]; do
+            response=$(curl -s -H "Authorization: token ${GH_TOKEN}" "$repos_url")
+            
+            # Extract repository names
+            repos=$(echo $response | jq -r '.[].name')
+            
+            for repo in $repos; do
+              # Fetch collaborators for each repository
+              collaborators_url="https://api.github.com/repos/${GH_ORG}/${repo}/collaborators?per_page=100"
+              collaborators=$(curl -s -H "Authorization: token ${GH_TOKEN}" "$collaborators_url" | jq -r '.[] | [.login, (.permissions | to_entries[] | select(.value == true).key)]')
+              
+              # Append data to CSV
+              for collaborator in $collaborators; do
+                user=$(echo $collaborator | jq -r '.[0]')
+                role=$(echo $collaborator | jq -r '.[1]')
+                echo "${repo},${role},${user}" >> repo_access_details.csv
+              done
+            done
+
+            # Check for pagination (next URL)
+            repos_url=$(echo $response | jq -r 'if . | length == 100 then (.[0] | .repos_url | select(. != null)) else null end')
+          done
+
+      - name: Upload CSV file as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: repo-access-details
+          path: repo_access_details.csv
