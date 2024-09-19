@@ -1,4 +1,4 @@
-name: Get Repo Access Details
+name: Get Repo Access Details New
 
 on:
   workflow_dispatch:
