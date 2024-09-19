@@ -1,0 +1,35 @@
+name: Get Repo Access Details
+
+on:
+  workflow_dispatch:
+
+jobs:
+  fetch-repo-access-details:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up environment
+      run: |
+        echo "ORG_NAME=your_org_name" >> $GITHUB_ENV
+        echo "TOKEN=${{ secrets.VENU_TOKEN }}" >> $GITHUB_ENV
+        echo "OUTPUT_FILE=repo_access_details.csv" >> $GITHUB_ENV
+
+    - name: Fetch repositories access details
+      run: |
+        echo "repo_name,role_name,user_name" > $OUTPUT_FILE
+        repos=$(curl -s -H "Authorization: token $TOKEN" https://api.github.com/orgs/$ORG_NAME/repos?per_page=100 | jq -r '.[].name')
+        for repo in $repos; do
+          echo "Processing repository: $repo"
+          collaborators=$(curl -s -H "Authorization: token $TOKEN" https://api.github.com/repos/$ORG_NAME/$repo/collaborators?per_page=100 | jq -r '.[] | {login: .login, role: .permissions.admin as $admin | if $admin then "admin" else "write" end} | [.login, .role] | @csv')
+          for collaborator in $collaborators; do
+            echo "$repo,$collaborator" >> $OUTPUT_FILE
+          done
+        done
+
+    - name: Upload CSV file as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: repo-access-details
+        path: repo_access_details.csv
