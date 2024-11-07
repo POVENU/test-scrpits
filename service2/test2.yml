@@ -1,0 +1,39 @@
+name: Export Repo Access Details
+
+on:
+  workflow_dispatch:
+
+jobs:
+  export-access-details:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up CSV Directory
+        run: |
+          mkdir -p ./docs/templates/export
+
+      - name: Get Access Details
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "repo_name,role_name,username" > ./docs/templates/export/repo-access-details.csv
+          # Fetching the list of repositories in the organization
+          repos=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+            "https://api.github.com/orgs/<YOUR_ORG>/repos" | jq -r '.[].name')
+
+          for repo in $repos; do
+            # Fetch access details for each repository
+            access=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+              "https://api.github.com/repos/<YOUR_ORG>/$repo/collaborators?affiliation=all")
+
+            echo "$access" | jq -r '.[] | "\(.repository.name),\(.role_name),\(.login)"' >> ./docs/templates/export/repo-access-details.csv
+          done
+
+      - name: Upload CSV as Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: repo-access-details
+          path: ./docs/templates/export/repo-access-details.csv
