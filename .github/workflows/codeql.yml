@@ -1,0 +1,76 @@
+name: CodeQL
+
+on:
+  pull_request:
+    paths:
+      - 'service1/**'
+      - 'service2/**'
+      - 'service3/**'
+
+jobs:
+  codeql-setup:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: 'javascript,python' # Adjust based on your language requirements
+
+  service1-codeql:
+    runs-on: ubuntu-latest
+    needs: codeql-setup
+    if: contains(github.event.pull_request.changed_files, 'service1/')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: 'javascript,python'
+          path: 'service1'  # Specify the directory for service1
+
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+  service2-codeql:
+    runs-on: ubuntu-latest
+    needs: codeql-setup
+    if: contains(github.event.pull_request.changed_files, 'service2/')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: 'javascript,python'
+          path: 'service2'  # Specify the directory for service2
+
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+  service3-codeql:
+    runs-on: ubuntu-latest
+    needs: codeql-setup
+    if: contains(github.event.pull_request.changed_files, 'service3/')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: 'javascript,python'
+          path: 'service3'  # Specify the directory for service3
+
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
