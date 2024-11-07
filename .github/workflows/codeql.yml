@@ -6,6 +6,8 @@ on:
       - 'service1/**'
       - 'service2/**'
       - 'service3/**'
+      
+  workflow_dispatch:
 
 jobs:
   codeql-setup:
