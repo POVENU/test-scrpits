@@ -1,0 +1,51 @@
+name: Replace Runner Labels
+
+on:
+  workflow_dispatch:
+
+jobs:
+  replace-runner:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Script Repository
+      uses: actions/checkout@v3
+
+    - name: Install jq
+      run: sudo apt-get install -y jq
+
+    - name: Read Repositories and Branches
+      id: repos
+      run: |
+        echo "$(cat repos-and-branches.json)" > repos.json
+
+    - name: Replace Runner Labels
+      env:
+        GITHUB_TOKEN: ${{ secrets.VENU_TOKEN }}
+      run: |
+        OLD_RUNNER="ubuntu-latest"
+        NEW_RUNNER="windows-latest"
+
+        for row in $(jq -c '.[]' repos.json); do
+          REPO=$(echo $row | jq -r '.repo')
+          BRANCH=$(echo $row | jq -r '.branch')
+
+          echo "Processing repository: $REPO, branch: $BRANCH"
+
+          # Clone the repository and check out the branch
+          git clone --branch $BRANCH https://github.com/your-org/$REPO.git
+          cd $REPO
+
+          # Replace old runner labels in workflow files
+          find .github/workflows -type f -name "*.yml" -exec sed -i "s/runs-on: \[$OLD_RUNNER\]/runs-on: \[$NEW_RUNNER\]/g" {} +
+
+          # Commit and push changes directly
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .github/workflows
+          git commit -m "Update runner labels: $OLD_RUNNER -> $NEW_RUNNER"
+          git push origin $BRANCH
+
+          cd ..
+          rm -rf $REPO
+        done
