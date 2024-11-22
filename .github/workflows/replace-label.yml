@@ -36,7 +36,7 @@ jobs:
           echo "Processing repository: $REPO, branch: $BRANCH"
 
           # Clone the repository and check out the branch
-          git clone --branch $BRANCH https://github.com/POVENU/$REPO.git
+          git checkout --branch $BRANCH https://github.com/POVENU/$REPO.git
           cd $REPO
 
           # Replace old runner labels in workflow files
