@@ -40,8 +40,8 @@ jobs:
           find .github/workflows -type f -name "*.yml" -exec sed -i "s/runs-on: \[$OLD_RUNNER\]/runs-on: \[$NEW_RUNNER\]/g" {} +
 
           # Commit and push changes directly
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
+          git config user.name "POVENU"
+          git config user.email "venugopalpk88@gmail.com"
           git add .github/workflows
           git commit -m "Update runner labels: $OLD_RUNNER -> $NEW_RUNNER"
           git push origin $BRANCH
