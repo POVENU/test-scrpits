@@ -1,10 +1,10 @@
 name: Replace Runner Labels
 
 on:
- # push:
- #    branches: 
- #         - main
-  workflow_dispatch:
+ push:
+    branches:
+      - main
+ workflow_dispatch:
 
 jobs:
   replace-runner:
