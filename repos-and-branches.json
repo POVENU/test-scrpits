@@ -1,0 +1,4 @@
+[
+  { "repo": "secret-scanning", "branch": "main" },
+  { "repo": "dev_venu", "branch": "main" }
+]
